@@ -751,6 +751,26 @@ if __name__ == "__main__":
         n_clusters = int(snakemake.wildcards.clusters)
         aggregate_carriers = None
 
+    # Define aggregation strategies up-front so they exist in ALL branches,
+    # including the fast-path (n_clusters == n_buses) which otherwise skips this
+    # and crashes later in groupby_bus_carrier with a NameError.
+    aggregation_strategies = snakemake.params.aggregation_strategies
+    update_config_dictionary(
+        config_dict=aggregation_strategies,
+        parameter_key_to_fill="lines",
+        dict_to_use={"v_nom": "first", "geometry": "first", "bounds": "first"},
+    )
+    update_config_dictionary(
+        config_dict=aggregation_strategies,
+        parameter_key_to_fill="buses",
+        dict_to_use={
+            "v_nom": "first",
+            "lat": "mean",
+            "lon": "mean",
+            "country": "first",
+        },
+    )
+
     if n_clusters == len(n.buses) and not alternative_clustering:
         # Fast-path if no clustering is necessary
         busmap = n.buses.index.to_series()
@@ -773,25 +793,6 @@ if __name__ == "__main__":
                 x == v
             ).all() or x.isnull().all(), "The `potential` configuration option must agree for all renewable carriers, for now!"
             return v
-
-        aggregation_strategies = snakemake.params.aggregation_strategies
-
-        # Aggregation strategies must be set for all columns
-        update_config_dictionary(
-            config_dict=aggregation_strategies,
-            parameter_key_to_fill="lines",
-            dict_to_use={"v_nom": "first", "geometry": "first", "bounds": "first"},
-        )
-        update_config_dictionary(
-            config_dict=aggregation_strategies,
-            parameter_key_to_fill="buses",
-            dict_to_use={
-                "v_nom": "first",
-                "lat": "mean",
-                "lon": "mean",
-                "country": "first",
-            },
-        )
 
         custom_busmap = snakemake.params.custom_busmap
         if custom_busmap:
