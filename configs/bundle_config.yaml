@@ -240,12 +240,10 @@ databundles:
     category: common
     destination: "data"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/323567/files/bundle_data_earth.zip?download=1
       gdrive: https://drive.google.com/file/d/1P4uMY464lgcp--8fAEYIJbKeNmHdg1Re/view?usp=drive_link
     output:
     - data/eez/eez_v11.gpkg
     - data/gebco/GEBCO_2025_sub_ice.nc
-    - data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
     - data/ssp2-2.6/2030/era5_2013/Africa.nc
     - data/ssp2-2.6/2030/era5_2013/Asia.nc
     - data/ssp2-2.6/2030/era5_2013/Europe.nc
@@ -259,19 +257,18 @@ databundles:
     category: natura
     destination: "data/natura/"
     urls:
-      zenodo: https://sandbox.zenodo.org/records/323567/files/natura_wpda_CC0.zip?download=1
       gdrive: https://drive.google.com/file/d/1H-Y7p8UgnbEzJgo9qPc54BpDXS8loX7Y/view?usp=drive_link
     output:
     - data/natura/natura.tiff
 
-  # # data bundle of the data folder for the african continent
-  # bundle_landclassification:
-  #   countries: [Earth]
-  #   category: copernicus
-  #   destination: "data/copernicus"
-  #   urls:
-  #     direct: https://zenodo.org/record/3939050/files/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
-  #   output: [data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif]
+  # data bundle for copernicus land classification (PROBAV LC100)
+  bundle_landclassification:
+    countries: [Earth]
+    category: copernicus
+    destination: "data/copernicus"
+    urls:
+      direct: https://zenodo.org/record/3939050/files/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif
+    output: [data/copernicus/PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif]
 
   # bundle_gebco:
   #   countries: [Earth]

@@ -577,4 +577,28 @@ if __name__ == "__main__":
 
     n.buses = pd.DataFrame(n.buses.drop(columns="geometry"))
     n.meta = snakemake.config
+
+    # pandas 3.x StringDtype is incompatible with xarray's netCDF4 writer in two ways:
+    # 1. np.issubdtype(StringDtype, np.datetime64) raises TypeError in conventions.py
+    # 2. object dtype (after converting StringDtype) raises ValueError in netCDF4_.py
+    # Fix: patch xarray's _nc4_dtype to treat object arrays as vlen strings,
+    # and convert StringDtype columns to plain object so np.issubdtype works.
+    import xarray.backends.netCDF4_ as _xr_nc4
+
+    _original_nc4_dtype = _xr_nc4._nc4_dtype
+
+    def _patched_nc4_dtype(var):
+        if var.dtype.kind == "O" and "dtype" not in var.encoding:
+            return str  # write object arrays as netCDF4 variable-length strings
+        return _original_nc4_dtype(var)
+
+    _xr_nc4._nc4_dtype = _patched_nc4_dtype
+
+    for c_name in n.all_components:
+        df = n.df(c_name)
+        if not df.empty:
+            string_cols = df.select_dtypes(include=["string"]).columns
+            if len(string_cols) > 0:
+                df[string_cols] = df[string_cols].astype(object)
+
     n.export_to_netcdf(snakemake.output[0])

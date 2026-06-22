@@ -159,9 +159,9 @@ def shapes_to_shapes(orig, dest):
     transfer = sparse.lil_matrix((len(dest), len(orig)), dtype=float)
 
     for i, j in product(range(len(dest)), range(len(orig))):
-        if orig_prepped[j].intersects(dest[i]):
-            area = orig[j].intersection(dest[i]).area
-            transfer[i, j] = area / dest[i].area
+        if orig_prepped[j].intersects(dest.iloc[i]):
+            area = orig.iloc[j].intersection(dest.iloc[i]).area
+            transfer[i, j] = area / dest.iloc[i].area
 
     return transfer
 
@@ -381,12 +381,18 @@ def build_demand_profiles(
         else:
             shapes_cntry = shapes.loc[shapes.country == cntry]
             transfer = shapes_to_shapes(group, shapes_cntry.geometry).T.tocsr()
-            gdp_n = pd.Series(
-                transfer.dot(shapes_cntry["gdp"].fillna(1.0).values), index=group.index
-            )
-            pop_n = pd.Series(
-                transfer.dot(shapes_cntry["pop"].fillna(1.0).values), index=group.index
-            )
+            if "gdp" in shapes_cntry.columns:
+                gdp_n = pd.Series(
+                    transfer.dot(shapes_cntry["gdp"].fillna(1.0).values), index=group.index
+                )
+            else:
+                gdp_n = pd.Series(1.0, index=group.index)
+            if "pop" in shapes_cntry.columns:
+                pop_n = pd.Series(
+                    transfer.dot(shapes_cntry["pop"].fillna(1.0).values), index=group.index
+                )
+            else:
+                pop_n = pd.Series(1.0, index=group.index)
 
             # relative factors 0.6 and 0.4 have been determined from a linear
             # regression on the country to EU continent load data
